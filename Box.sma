@@ -127,7 +127,8 @@ public plugin_end() {
 			SQL_FreeHandle(g_iSqlTuple);
 		}
 	#else
-		BOX_Save();
+		if (gbConfigDirty)
+			BOX_Save();
 	#endif
 }
 
@@ -158,7 +159,10 @@ public cmdBoxRename(id, level, cid) {
 		trim(szNewId);
 		
 		if (szNewId[0] != '^0')
+		{
 			set_pev(giZones[iZonesLast], PEV_ID, szNewId);
+			gbConfigDirty = true;
+		}
 			
 		refreshMenu(id);
 	}        
@@ -168,6 +172,14 @@ public cmdBoxRename(id, level, cid) {
 public cmdBox(id, level, cid) {
 	if (!cmd_access(id, level, cid, 1))
 		return PLUGIN_HANDLED;
+
+	#if USE_SQL
+		// Do not let an editor change an empty in-memory map while its async load is pending.
+		if (g_iSqlTuple != Empty_Handle && !gbDBLoaded) {
+			client_print(id, print_chat, "[Box] Database configuration is still loading.");
+			return PLUGIN_HANDLED;
+		}
+	#endif
 		
 	BOX_EditorMode(true);
 	
@@ -232,6 +244,7 @@ public Pressedbox(id, key) {
 					pev(ent, PEV_TYPE, szClass, 31);
 					ExecuteForward(fwOnDelete, iRet, ent, szClass);
 					set_pev(ent, PEV_TYPE, gszType[id] == -1 ? "box" : gszTypeClass[gszType[id]]);
+					gbConfigDirty = true;
 					pev(ent, PEV_TYPE, szClass, 31);
 					ExecuteForward(fwOnCreate, iRet, ent, szClass);
 				}
@@ -378,6 +391,9 @@ public BOX_Add(ent, id) {
 	giZones[giZonesP] = ent;
 	giZonesHistory[giZonesP] = ArrayCreate(3);
 	giZonesP++;
+
+	if (id > 0)
+		gbConfigDirty = true;
 }
 
 BOX_Remove(num, id = 0) {
@@ -404,6 +420,7 @@ BOX_Remove(num, id = 0) {
 		giZonesLast[id] = -1;
 		giMarked[id] = 0;
 		giCatched[id] = 0;
+		gbConfigDirty = true;
 	}
 }
 
@@ -602,6 +619,8 @@ public BOX_AnchorMoveProcess(id, ent) {
 }
 
 BOX_UpdateSize(box, const Float:fVec[3], const Float:fVec2[3], anchor = -1) {
+	gbConfigDirty = true;
+
 	new Float:fMins[3];
 	fMins[0] = floatmin(fVec[0], fVec2[0]);
 	fMins[1] = floatmin(fVec[1], fVec2[1]);

@@ -70,4 +70,6 @@ enum Settings {
 new g_eSettings[Settings];
 new Handle:g_iSqlTuple;
 new g_fwdDBLoaded;
+new bool:gbConfigDirty;
+new bool:gbDBLoaded;
 // ----------------------------------------------------------------------- //

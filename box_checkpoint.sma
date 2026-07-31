@@ -3,6 +3,7 @@
 #include <engine>
 #include <fun>
 #include <box_system>
+#include <nvault_array>
 
 #define MAX_PLAYERS 32
 #define MAX_ENTITIES 512
@@ -83,6 +84,18 @@ public timer_player_started(id)
 {
     ResetPlayerCheckpoints(id);
 }
+
+// public timer_player_record(id)
+// {
+//     new cat = timer_player_category(id);
+
+//     SaveRecordCheckpoints(id, cat);
+// }
+
+// public SaveRecordCheckpoints(id, cat)
+// {
+    
+// }
 
 stock ResetPlayerCheckpoints(id)
 {

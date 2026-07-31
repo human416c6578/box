@@ -11,5 +11,6 @@ CREATE TABLE box (
 	mins_z FLOAT NOT NULL,
 	maxs_x FLOAT NOT NULL,
 	maxs_y FLOAT NOT NULL,
-	maxs_z FLOAT NOT NULL
+	maxs_z FLOAT NOT NULL,
+	INDEX idx_box_map (map)
 );

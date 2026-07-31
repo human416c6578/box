@@ -23,6 +23,8 @@ public mysql_init() {
 }
 
 public DB_LoadMapConfig(const szMapName[]) {
+	gbDBLoaded = false;
+
 	if (g_iSqlTuple == Empty_Handle) {
 		if (g_bDebugMode)
 			log_amx("Cannot load from database: Invalid SQL tuple handle. Check database connection.");
@@ -69,11 +71,19 @@ public QueryLoadMapConfigHandler(iFailState, Handle:iQuery, szError[], iErrorCod
 		SQL_NextRow(iQuery);
 	}
 
+	gbDBLoaded = true;
+
 	static iReturn;
 	ExecuteForward(g_fwdDBLoaded, iReturn);
 }
 
 public DB_SaveMapConfig() {
+	if (!gbDBLoaded || !gbConfigDirty) {
+		if (g_bDebugMode)
+			log_amx("Skipping database save: map was not loaded successfully or has no local edits.");
+		return;
+	}
+
 	if (g_iSqlTuple == Empty_Handle) {
 		if (g_bDebugMode)
 			log_amx("Cannot save to database: Invalid SQL tuple handle. Check database connection.");
